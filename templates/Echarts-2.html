@@ -1,0 +1,564 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="static/lib/html5shiv.js"></script>
+<script type="text/javascript" src="static/lib/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="static/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+
+<link rel="stylesheet" type="text/css" href="static/css/bootstrap.min.css" />
+
+
+<!--<script type="text/javascript" charset="utf-8" src="static/js/jquery-3.1.1.min.js"></script>-->
+<!--<script type="text/javascript" charset="utf-8" src="static/js/bootstrap.min.js"></script>-->
+<!--<script type="text/javascript" charset="utf-8" src="static/js/echarts.min.js"></script>-->
+
+<!--&lt;!&ndash;[if IE 6]>&ndash;&gt;-->
+<!--<script type="text/javascript" src="static/lib/DD_belatedPNG_0.0.8a-min.js" ></script>-->
+<!--添加Echarts的CSS样式-->
+
+<![endif]-->
+<title>技术指标可视化</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 可视化管理 <span class="c-gray en">&gt;</span> 交易指标数据可视化 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<div class="text-c">
+		<button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+		<input type="text" name="dataId" id="dataId" placeholder="技术指标数据ID" style="width:250px" class="input-text">
+		<button name="" id="" class="btn btn-success" type="button" onclick="searchData()" ><i class="Hui-iconfont">&#xe665;</i> 搜数据集</button>
+	</div>
+</div>
+<div id="container" style="min-width:700px;height:1200px;" class="echarts"></div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="static/lib/jquery/1.9.1/jquery.min.js"></script> 
+<script type="text/javascript" src="static/lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script> 
+<script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script> <!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/highcharts.js"></script>
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/modules/exporting.js"></script>
+
+<!--添加Echarts插件-->
+<script type="text/javascript" src="static/lib/echarts/3.4.0/echarts.js"></script>
+<script type="text/javascript">
+function searchData(){
+	var id = $('#dataId').val();
+	$.ajax({
+			type: 'delete',
+			url: 'data_search2/'+id,
+			dataType: 'json',
+			success: function(data){
+			console.log(data)
+				if (data.status == 'success') {
+					rawData = JSON.parse(data.showData);
+					layer.msg('获取数据集成功！',{icon:1,time:1000});
+					addEcharts(rawData);
+				}else{
+					layer.msg('获取数据集失败！',{icon:1,time:1000});
+					location.replace(location.href);
+				}
+				//$(obj).parents("tr").remove();
+
+			},
+			error:function(data) {
+				console.log(data.msg);
+			},
+		});
+}
+function addEcharts(showData){
+	/*基于准备好的dom，初始化echarts实例*/
+			var myChart = echarts.init(document.getElementById('container'));
+
+
+			var colorList = ['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'];
+			var labelFont = 'bold 12px Sans-serif';
+
+			var chartTitle = showData.chartTitle
+			var dates = showData.date
+			var data = showData.data
+			var volume = showData.volume
+
+			var MA_5 = showData.MA_5
+			var MA_10 = showData.MA_10
+			var MA_20 = []
+			var EMA10 = showData.EMA10
+			var EMA20 = showData.EMA20
+			var EMA30 = showData.EMA30
+			var KValue = showData.KValue
+			var DValue = showData.DValue
+			var JValue = showData.JValue
+			var PSY = showData.PSY
+
+
+
+
+
+
+			option = {
+				animation: false,
+				color: colorList,
+				title: {
+					left: 'center',
+					text: chartTitle
+				},
+				legend: [{top: 30,
+					data: ['日K', 'MA5', 'MA10', 'MA20']},
+					{
+						gridIndex: 1,
+						xAxisIndex: 1,
+						yAxisIndex: 1,
+						data:['EMA10', 'EMA20', 'EMA30']
+					}
+				],
+				tooltip: {
+					triggerOn: 'none',
+					transitionDuration: 0,
+					confine: true,
+					bordeRadius: 4,
+					borderWidth: 1,
+					borderColor: '#333',
+					backgroundColor: 'rgba(255,255,255,0.9)',
+					textStyle: {
+						fontSize: 12,
+						color: '#333'
+					},
+					position: function (pos, params, el, elRect, size) {
+						var obj = {
+							top: 60
+						};
+						obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 5;
+						return obj;
+					}
+				},
+				axisPointer: {
+					link: [{
+						xAxisIndex: [0, 1, 2, 3, 4]
+					}]
+				},
+				dataZoom: [{
+					type: 'slider',
+					xAxisIndex: [0, 1, 2, 3, 4],
+					realtime: false,
+					start: 20,
+					end: 70,
+					top: 65,
+					height: 20,
+					handleIcon: 'M10.7,11.9H9.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4h1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+					handleSize: '120%'
+				}, {
+					type: 'inside',
+					xAxisIndex: [0, 1, 2, 3, 4],
+					start: 40,
+					end: 70,
+					top: 30,
+					height: 20
+				}],
+				xAxis: [{
+					type: 'category',
+					data: dates,
+					boundaryGap : false,
+					axisTick: {show: false},
+					axisLine: { lineStyle: { color: '#777' } },
+					axisLabel: {
+						show:false,
+						// formatter: function (value) {
+						// 	return echarts.format.formatTime('yyyy-' +
+						// 			'MM-dd', value);
+						// }
+					},
+					min: 'dataMin',
+					max: 'dataMax',
+					axisPointer: {
+						show: true
+					}
+				}, {
+					type: 'category',
+					gridIndex: 1,
+					data: dates,
+					scale: true,
+					boundaryGap : false,
+					splitLine: {show: false},
+					axisLabel: {show: false},
+					axisTick: {show: false},
+					axisLine: { lineStyle: { color: '#777' } },
+					splitNumber: 20,
+					min: 'dataMin',
+					max: 'dataMax',
+					axisPointer: {
+						show: true
+					}
+				},{
+					type: 'category',
+					gridIndex: 2,
+					data: dates,
+					scale: true,
+					boundaryGap : false,
+					splitLine: {show: false},
+					axisLabel: {show: false},
+					axisTick: {show: false},
+					axisLine: { lineStyle: { color: '#777' } },
+					splitNumber: 20,
+					min: 'dataMin',
+					max: 'dataMax',
+					axisPointer: {
+						show: true
+					}
+				},{
+					type: 'category',
+					gridIndex: 3,
+					data: dates,
+					scale: true,
+					boundaryGap : false,
+					splitLine: {show: false},
+					axisLabel: {show: false},
+					axisTick: {show: false},
+					axisLine: { lineStyle: { color: '#777' } },
+					splitNumber: 20,
+					min: 'dataMin',
+					max: 'dataMax',
+					axisPointer: {
+						show: true
+					}
+				},{
+					type: 'category',
+					gridIndex: 4,
+					data: dates,
+					scale: true,
+					boundaryGap : false,
+					axisLabel: {
+						formatter: function (value) {
+							return echarts.format.formatTime('yyyy-' +
+									'MM-dd', value);
+						}
+					},
+					axisTick: {show: true},
+					axisLine: { lineStyle: { color: '#777' } },
+					splitNumber: 20,
+					min: 'dataMin',
+					max: 'dataMax',
+					axisPointer: {
+						type: 'shadow',
+						label: {show: false},
+						triggerTooltip: true,
+						handle: {
+							show: true,
+							margin: 30,
+							color: '#B80C00'
+						}
+					}
+				}],
+				yAxis: [{
+					scale: true,
+					splitNumber: 2,
+					axisLine: { lineStyle: { color: '#777' } },
+					splitLine: { show: true },
+					axisTick: { show: false },
+					axisLabel: {
+						inside: true,
+						formatter: '{value}\n'
+					}
+				}, {
+					scale: true,
+					gridIndex: 1,
+					splitNumber: 2,
+					axisLabel: {show: false},
+					axisLine: {show: false},
+					axisTick: {show: false},
+					splitLine: {show: false}
+				},{
+					scale: true,
+					gridIndex: 2,
+					splitNumber: 2,
+					axisLabel: {show: false},
+					axisLine: {show: false},
+					axisTick: {show: false},
+					splitLine: {show: false}
+				},{
+					scale: true,
+					gridIndex: 3,
+					splitNumber: 2,
+					axisLabel: {show: false},
+					axisLine: {show: false},
+					axisTick: {show: false},
+					splitLine: {show: false}
+				},{
+					scale: true,
+					gridIndex: 4,
+					splitNumber: 2,
+					axisLabel: {show: false},
+					axisLine: {show: false},
+					axisTick: {show: false},
+					splitLine: {show: false}
+				}],
+				grid: [{
+					left: 20,
+					right: 20,
+					top: 100,
+					height: 150
+				}, {
+					left: 20,
+					right: 20,
+					height: 40,
+					top: 260
+				},{
+					left: 20,
+					right: 20,
+					height: 40,
+					top: 310
+				},{
+					left: 20,
+					right: 20,
+					height: 40,
+					top: 360
+				},{
+					left: 20,
+					right: 20,
+					height: 40,
+					top: 410
+				}],
+				graphic: [{
+					type: 'group',
+					left: 'center',
+					top: 70,
+					width: 300,
+					bounding: 'raw',
+					children: [{
+						id: 'MA5',
+						type: 'text',
+						style: {fill: colorList[1], font: labelFont},
+						left: 0
+					}, {
+						id: 'MA10',
+						type: 'text',
+						style: {fill: colorList[2], font: labelFont},
+						left: 'center'
+					}, {
+						id: 'MA20',
+						type: 'text',
+						style: {fill: colorList[3], font: labelFont},
+						right: 0
+					}]},
+					{
+					type: 'group',
+					left: 'center',
+					// top: 70,
+					// width: 300,
+					bounding: 'raw',
+					children: [{
+						id: 'EMA_10',
+						type: 'text',
+						style: {fill: colorList[1], font: labelFont},
+						left: 0
+					}, {
+						id: 'EMA_20',
+						type: 'text',
+						style: {fill: colorList[2], font: labelFont},
+						left: 'center'
+					}, {
+						id: 'EMA_30',
+						type: 'text',
+						style: {fill: colorList[3], font: labelFont},
+						right: 0
+					}]},{
+					type: 'group',
+					left: 'center',
+					// top: 70,
+					// width: 300,
+					bounding: 'raw',
+					children: [{
+						id: 'KValue',
+						type: 'text',
+						style: {fill: colorList[1], font: labelFont},
+						left: 0
+					}, {
+						id: 'DValue',
+						type: 'text',
+						style: {fill: colorList[2], font: labelFont},
+						left: 'center'
+					}, {
+						id: 'JValue',
+						type: 'text',
+						style: {fill: colorList[3], font: labelFont},
+						right: 0
+					}]
+				}],
+				series: [{
+					type: 'candlestick',
+					name: '日K',
+					data: data,
+					itemStyle: {
+						normal: {
+							color: '#ef232a',
+							color0: '#14b143',
+							borderColor: '#ef232a',
+							borderColor0: '#14b143'
+						},
+						emphasis: {
+							color: 'black',
+							color0: '#444',
+							borderColor: 'black',
+							borderColor0: '#444'
+						}
+					}
+				}, {
+					name: 'MA5',
+					type: 'line',
+					data: MA_5,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				}, {
+					name: 'MA10',
+					type: 'line',
+					data: MA_10,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				}, {
+					name: 'MA20',
+					type: 'line',
+					data: MA_20,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'Volume',
+					type: 'bar',
+					xAxisIndex: 1,
+					yAxisIndex: 1,
+					itemStyle: {
+						normal: {
+							color: '#7fbe9e'
+						},
+						emphasis: {
+							color: '#140'
+						}
+					},
+					data: volume
+				},
+					{
+					name: 'KValue',
+					type: 'line',
+					xAxisIndex: 3,
+					yAxisIndex: 3,
+					data: KValue,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'EMA_10',
+					type: 'line',
+					xAxisIndex: 2,
+					yAxisIndex: 2,
+					data: EMA10,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'EMA_20',
+					type: 'line',
+					xAxisIndex: 2,
+					yAxisIndex: 2,
+					data: EMA20,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'EMA_30',
+					type: 'line',
+					xAxisIndex: 2,
+					yAxisIndex: 2,
+					data: EMA30,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'DValue',
+					type: 'line',
+					xAxisIndex: 3,
+					yAxisIndex: 3,
+					data: DValue,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'JValue',
+					type: 'line',
+					xAxisIndex: 3,
+					yAxisIndex: 3,
+					data: JValue,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				},{
+					name: 'PSY',
+					type: 'line',
+					xAxisIndex: 4,
+					yAxisIndex: 4,
+					data: PSY,
+					smooth: true,
+					showSymbol: false,
+					lineStyle: {
+						normal: {
+							width: 1
+						}
+					}
+				}]
+			}
+
+
+			// 使用刚指定的配置项和数据显示图表
+			myChart.setOption(option);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+{% extends "sdv/base_v.html" %}
+
+{% load static from staticfiles %}
+
+{% block linkscript %}
+<script type="text/javascript" charset="UTF-8" src="{%static '/js/pred_data_v.js'%}"></script>
+{% endblock linkscript %}
+
+{% block breadcrumb%}
+	
+	<li>
+		 <a href="#">Visualization</a>
+	</li>
+	<li class="active">
+		Predicted data visualized
+	</li>
+{% endblock breadcrumb %}
+
+{% block searchForm%}
+	<form class="form-inline" role="form" style="text-align: center" action="/pred_v/" method="post">
+ {% endblock searchForm%}
+
+{%block chart%}
+	<script type="text/javascript">
+
+		/*基于准备好的dom，初始化echarts实例*/
+        var myChart = echarts.init(document.getElementById('main'));
+        var chartTitle ='{{showData.chartTitle|safe}}'
+		var date = {{showData.date|safe}}
+		var priceData = {{showData.priceData|safe}}
+		var predictData = {{showData.predictData|safe}}
+
+    	option = {
+    title: {
+        text: chartTitle,
+        left: 'center',
+    },
+    tooltip: {
+        trigger: 'axis'
+    },
+    legend: {
+    	top: 30,
+        data:['收盘价', '预测价格']
+    },
+    toolbox: {
+        show: true,
+        feature: {
+            dataZoom: {
+                yAxisIndex: [0]
+            },
+            dataView: {readOnly: false},
+            magicType: {type: ['line', 'bar']},
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    xAxis:  {
+        type: 'category',
+        boundaryGap: false,
+        data: date
+
+    },
+    yAxis: {
+        type: 'value',
+        axisLabel: {
+            formatter: '￥{value} '
+        },
+		scale:true,
+    },
+    series:[{
+		name: '收盘价',
+		type: 'line',
+		data: priceData,
+		markPoint: {
+			data: [
+				{type: 'max', name: '最大值'},
+				{type: 'min', name: '最小值'},
+
+			]
+		},
+		markLine: {
+			data: [
+				{type: 'average', name: '平均值'}
+			]
+		}},
+		{
+			name: '预测价格',
+			type: 'line',
+			symbol:'roundRect',
+		    data: predictData,
+			markPoint: {
+			data: [
+
+				{
+					name: '预测值',
+					symbol: 'arrow',
+					coord: [10, predictData[10]],
+					symbolSize: 20,
+
+				}
+			]
+		},
+
+	    }
+	]
+
+
+
+};
+
+
+    	// 使用刚指定的配置项和数据显示图表
+        myChart.setOption(option);
+
+	</script>
+
+
+{%endblock chart%}
+

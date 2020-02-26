@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="static/lib/html5shiv.js"></script>
+<script type="text/javascript" src="static/lib/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="static/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+<!--[if IE 6]>-->
+<script type="text/javascript" src="static/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
+<!--添加Echarts的CSS样式-->
+
+<![endif]-->
+<title>K线图</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 可视化管理 <span class="c-gray en">&gt;</span> 交易基本数据可视化 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<div class="text-c">
+		<button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+	 	<input type="text" name="" id="dataId" placeholder=" 股票数据ID" style="width:250px" class="input-text">
+		<button name="" id="" class="btn btn-success" type="button" onclick="searchData()"><i class="Hui-iconfont">&#xe665;</i> 搜数据集</button>
+	</div>
+
+	<div id="container" style="min-width:700px;height:600px;margin-top:20px;" class="echarts"></div>
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="static/lib/jquery/1.9.1/jquery.min.js"></script> 
+<script type="text/javascript" src="static/lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script> 
+<script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script> <!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/highcharts.js"></script>
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/modules/exporting.js"></script>
+
+<!--添加Echarts插件-->
+<script type="text/javascript" src="static/lib/echarts/3.4.0/echarts.js"></script>
+<script type="text/javascript">
+//var rawData = {{ list|safe }};
+
+function searchData(){
+	var id = $('#dataId').val();
+	$.ajax({
+			type: 'delete',
+			url: 'data_search/'+id,
+			dataType: 'json',
+			success: function(data){
+				if (data.status == 'success') {
+					rawData = JSON.parse(data.data);
+					codeName  = data.codeName;
+					layer.msg('获取数据集成功！',{icon:1,time:1000});
+					addEcharts(rawData,codeName);
+				}else{
+					layer.msg('获取数据集失败！',{icon:1,time:1000});
+					location.replace(location.href);
+				}
+				//$(obj).parents("tr").remove();
+
+			},
+			error:function(data) {
+				console.log(data.msg);
+			},
+		});
+}
+var codeName = '移动端 K线图'
+var rawData = [
+['2015/10/30','3380.28','3382.56','3346.59','3417.2','243595120','30726678','-'],
+['2015/10/29','3387.77','3387.32','3362.51','3411.71','235676016','29450842','-'],
+['2015/10/28','3417.01','3375.2','3367.23','3439.76','293523296','36165620','-'],
+['2015/10/27','3409.14','3434.34','3332.62','3441.57','328172768','40888724','-'],
+['2015/10/26','3448.65','3429.58','3402','3457.52','365560864','45394252','-'],
+['2015/10/23','3377.55','3412.43','3360.22','3422.02','347372864','42526308','-'],
+['2015/10/22','3292.29','3368.74','3282.99','3373.78','323739328','37545200','-'],
+['2015/10/21','3428.56','3320.68','3265.44','3447.26','458455424','51850924','-'],
+['2015/10/20','3377.55','3425.33','3357.86','3425.52','318973760','38358252','-'],
+['2015/10/19','3401.63','3386.7','3355.57','3423.4','378112160','45330364','-'],
+['2015/10/16','3358.3','3391.35','3334.85','3393.02','395460576','45944784','-'],
+['2015/10/15','3255.03','3338.07','3254.39','3338.3','316283840','36256556','-'],
+['2015/10/14','3280.02','3262.44','3256.25','3307.32','295077760','33027752','-'],
+['2015/10/13','3262.16','3293.23','3253.25','3298.63','297153120','33480608','-'],
+['2015/10/12','3193.54','3287.66','3188.41','3318.71','386294688','43554100','-'],
+['2015/10/9','3146.64','3183.15','3137.79','3192.72','234851456','25637910','-'],
+['2015/10/8','3156.07','3143.36','3133.13','3172.28','234276048','25883034','-'],
+['2015/9/30','3052.84','3052.78','3039.74','3073.3','146642448','15656919','-'],
+['2015/9/29','3055.22','3038.14','3021.16','3068.3','163222672','16968660','-'],
+['2015/9/28','3085.57','3100.76','3042.31','3103.07','156727536','16642240','-'],
+['2015/9/25','3130.85','3092.35','3063','3149.95','236263872','24897112','-'],
+['2015/9/24','3126.49','3142.69','3109.69','3151.16','212887712','23136904','-'],
+['2015/9/23','3137.72','3115.89','3104.74','3164.04','236322672','25756004','-'],
+['2015/9/22','3161.32','3185.62','3152.48','3213.48','274786176','30507132','-'],
+['2015/9/21','3072.09','3156.54','3060.86','3159.88','239897360','25979668','-'],
+['2015/9/18','3100.28','3097.92','3070.34','3122.05','209175392','21844244','-'],
+['2015/9/17','3131.98','3086.06','3085.31','3204.7','317602912','33739328','-'],
+['2015/9/16','2998.04','3152.26','2983.54','3182.93','277524512','28199226','-'],
+['2015/9/15','3043.8','3005.17','2983.92','3081.7','249194448','24390460','-'],
+['2015/9/14','3221.17','3114.8','3049.23','3229.48','346631168','37357680','-'],
+['2015/9/11','3189.48','3200.23','3163.45','3223.76','224557808','25276946','-'],
+['2015/9/10','3190.55','3197.89','3178.9','3243.28','273261760','29958108','-'],
+['2015/9/9','3182.55','3243.09','3165.7','3256.74','375328000','41299144','-'],
+['2015/9/8','3054.44','3170.45','3011.12','3174.71','255415456','26391038','-'],
+['2015/9/7','3149.38','3080.42','3066.3','3217.58','296468096','30268972','-'],
+['2015/9/2','3027.68','3160.17','3019.09','3194.48','438170176','42326236','-'],
+['2015/9/1','3157.83','3166.62','3053.74','3180.33','432432448','42041164','-'],
+['2015/8/31','3203.56','3205.99','3109.16','3207.86','397431392','43106860','-'],
+['2015/8/28','3125.26','3232.35','3102.95','3235.84','443136928','47463100','-'],
+['2015/8/27','2978.03','3083.59','2906.49','3085.42','400308384','40428928','-'],
+['2015/8/26','2980.79','2927.29','2850.71','3092.04','466699680','46178896','-'],
+['2015/8/25','3004.13','2964.97','2947.94','3123.03','352325088','35873576','-'],
+['2015/8/24','3373.48','3209.91','3191.88','3388.36','334671776','35881888','-'],
+['2015/8/21','3609.96','3507.74','3490.54','3652.84','369920480','45061648','-'],
+['2015/8/20','3754.57','3664.29','3663.61','3788.01','390063072','50119500','-'],
+['2015/8/19','3646.8','3794.11','3558.38','3811.43','475396224','59951332','-'],
+['2015/8/18','3999.13','3748.16','3743.39','4006.34','543770816','72246720','-'],
+['2015/8/17','3947.84','3993.67','3907.4','3994.54','460432064','62632768','-'],
+['2015/8/14','3976.41','3965.33','3939.83','4000.68','467988224','64746644','-'],
+['2015/8/13','3869.91','3954.56','3838.16','3955.79','430073280','57868552','-'],
+['2015/8/12','3881.23','3886.32','3871.14','3937.77','442688256','59705028','-'],
+['2015/8/11','3928.81','3927.91','3891.18','3970.34','538923456','71228992','-'],
+['2015/8/10','3786.03','3928.42','3775.85','3943.62','497304320','65262204','-'],
+['2015/8/7','3692.61','3744.2','3686.3','3756.74','340757184','44548504','-'],
+['2015/8/6','3625.5','3661.54','3614.74','3710.57','274074656','35751512','-'],
+['2015/8/5','3745.65','3694.57','3676.39','3782.35','366423008','48385028','-'],
+['2015/8/4','3621.85','3756.54','3601.29','3757.03','362901664','46403624','-'],
+['2015/8/3','3614.99','3622.91','3549.5','3648.94','363968704','44599160','-']].reverse();
+
+$(function () {
+	 addEcharts(rawData,codeName);
+});
+
+function addEcharts(rawData,codeName){
+	var myChart = echarts.init(document.getElementById("container"));
+	var dates = rawData.map(function (item) {
+		return item[0];
+	});
+
+	var data = rawData.map(function (item) {
+		return [+item[1], +item[2], +item[3], +item[4]];
+	});
+
+	function calculateMA(dayCount, data) {
+		var result = [];
+		for (var i = 0, len = data.length; i < len; i++) {
+			if (i < dayCount) {
+				result.push('-');
+				continue;
+			}
+			var sum = 0;
+			for (var j = 0; j < dayCount; j++) {
+				sum += data[i - j][1];
+			}
+			result.push(sum / dayCount);
+		}
+		return result;
+	}
+
+	var option = {
+		title: {
+			left: 'center',
+			text: codeName,
+			textStyle: {
+				color: '#fff'
+			}
+		},
+		backgroundColor: '#21202D',
+		legend: {
+			top: 30,
+			data: ['日K', 'MA5', 'MA10', 'MA20', 'MA30'],
+			inactiveColor: '#777',
+			textStyle: {
+				color: '#fff'
+			}
+		},
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: {
+				animation: false,
+				type: 'cross',
+				lineStyle: {
+					color: '#376df4',
+					width: 2,
+					opacity: 1
+				}
+			}
+		},
+		xAxis: {
+			type: 'category',
+			data: dates,
+			axisLine: { lineStyle: { color: '#8392A5' } }
+		},
+		yAxis: {
+			scale: true,
+			axisLine: { lineStyle: { color: '#8392A5' } },
+			splitLine: { show: false }
+		},
+		grid: {
+			bottom: 80
+		},
+		dataZoom: [{
+			textStyle: {
+				color: '#8392A5'
+			},
+			handleIcon: 'M10.7,11.9v-1.3H9.3v1.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4v1.3h1.3v-1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+			handleSize: '80%',
+			dataBackground: {
+				areaStyle: {
+					color: '#8392A5'
+				},
+				lineStyle: {
+					opacity: 0.8,
+					color: '#8392A5'
+				}
+			},
+			handleStyle: {
+				color: '#fff',
+				shadowBlur: 3,
+				shadowColor: 'rgba(0, 0, 0, 0.6)',
+				shadowOffsetX: 2,
+				shadowOffsetY: 2
+			}
+		}, {
+			type: 'inside'
+		}],
+		animation: false,
+		series: [
+			{
+				type: 'candlestick',
+				name: '日K',
+				data: data,
+				itemStyle: {
+					normal: {
+						color: '#FD1050',
+						color0: '#0CF49B',
+						borderColor: '#FD1050',
+						borderColor0: '#0CF49B'
+					}
+				}
+			},
+			{
+				name: 'MA5',
+				type: 'line',
+				data: calculateMA(5, data),
+				smooth: true,
+				showSymbol: false,
+				lineStyle: {
+					normal: {
+						width: 1
+					}
+				}
+			},
+			{
+				name: 'MA10',
+				type: 'line',
+				data: calculateMA(10, data),
+				smooth: true,
+				showSymbol: false,
+				lineStyle: {
+					normal: {
+						width: 1
+					}
+				}
+			},
+			{
+				name: 'MA20',
+				type: 'line',
+				data: calculateMA(20, data),
+				smooth: true,
+				showSymbol: false,
+				lineStyle: {
+					normal: {
+						width: 1
+					}
+				}
+			},
+			{
+				name: 'MA30',
+				type: 'line',
+				data: calculateMA(30, data),
+				smooth: true,
+				showSymbol: false,
+				lineStyle: {
+					normal: {
+						width: 1
+					}
+				}
+			}
+		]
+	};
+	myChart.setOption(option);
+}
+
+</script>
+</body>
+</html>

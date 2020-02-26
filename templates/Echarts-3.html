@@ -1,0 +1,155 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="static/lib/html5shiv.js"></script>
+<script type="text/javascript" src="static/lib/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="static/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+<!--[if IE 6]>-->
+<script type="text/javascript" src="static/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
+<![endif]-->
+<title>预测模型数据可视化</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 可视化管理 <span class="c-gray en">&gt;</span> 预测模型数据可视化 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<div class="text-c">
+		<button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+	 	<input type="text" name="" id="dataId" placeholder="输入预测数据ID" style="width:250px" class="input-text">
+		<button name="" id="" class="btn btn-success" type="button" onclick="searchData()"><i class="Hui-iconfont">&#xe665;</i> 搜数据集</button>
+	</div>
+	<div id="container" style="min-width:700px;height:400px" class="echarts"></div>
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="static/lib/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="static/lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script> <!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/highcharts.js"></script>
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/modules/exporting.js"></script>
+
+<!--添加Echarts插件-->
+<script type="text/javascript" src="static/lib/echarts/3.4.0/echarts.js"></script>
+
+<script type="text/javascript">
+function searchData(){
+	var id = $('#dataId').val();
+	$.ajax({
+			type: 'delete',
+			url: 'data_search3/'+id,
+			dataType: 'json',
+			success: function(data){
+				if (data.status == 'success') {
+					rawData = JSON.parse(data.showData);
+					layer.msg('获取数据集成功！',{icon:1,time:1000});
+					addEcharts(rawData);
+				}else{
+					layer.msg('获取数据集失败！',{icon:1,time:1000});
+					location.replace(location.href);
+				}
+				//$(obj).parents("tr").remove();
+
+			},
+			error:function(data) {
+				console.log(data.msg);
+			},
+		});
+}
+function addEcharts(showData){
+/*基于准备好的dom，初始化echarts实例*/
+	var myChart = echarts.init(document.getElementById('container'));
+	var chartTitle = showData.chartTitle
+	var date = showData.date
+	var priceData = showData.priceData
+	var predictData = showData.predictData
+
+
+	option = {
+		title: {
+			text: chartTitle,
+			left: 'center',
+		},
+		tooltip: {
+			trigger: 'axis'
+		},
+		legend: {
+			top: 30,
+			data:['收盘价', '预测价格']
+		},
+		toolbox: {
+			show: true,
+			feature: {
+				dataZoom: {
+					yAxisIndex: [0]
+				},
+				dataView: {readOnly: false},
+				magicType: {type: ['line', 'bar']},
+				restore: {},
+				saveAsImage: {}
+			}
+		},
+		xAxis:  {
+			type: 'category',
+			boundaryGap: false,
+			data: date
+
+		},
+		yAxis: {
+			type: 'value',
+			axisLabel: {
+				formatter: '￥{value} '
+			},
+			scale:true,
+		},
+		series:[{
+			name: '收盘价',
+			type: 'line',
+			data: priceData,
+			markPoint: {
+				data: [
+					{type: 'max', name: '最大值'},
+					{type: 'min', name: '最小值'},
+				]
+			},
+			markLine: {
+				data: [
+					{type: 'average', name: '平均值'}
+				]
+			}},
+			{
+				name: '预测价格',
+				type: 'line',
+				symbol:'roundRect',
+				data: predictData,
+				markPoint: {
+				data: [
+					{
+						name: '预测值',
+						symbol: 'arrow',
+						coord: [10, predictData[10]],
+						symbolSize: 20,
+					}
+				]
+			},
+			}
+		]
+	};
+	// 使用刚指定的配置项和数据显示图表
+	myChart.setOption(option);
+}
+
+	</script>
+</body>
+</html>
