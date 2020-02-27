@@ -10,4 +10,4 @@ def TI_PCA(data):
     :param data: 输入特征矩阵，ndarray
     :return: 输出特征选择后的特征矩阵
     """
-    return PCA(n_components=8).fit_transform(data)
+    return PCA(n_components=15).fit_transform(data)

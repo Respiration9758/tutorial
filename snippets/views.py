@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 import os,time
+from django.views.decorators.csrf import csrf_exempt
 
 #ss管理
 @login_required(login_url='/login')
@@ -318,6 +319,7 @@ def sto_delete(request,id):
 
 from snippets.models import StockData
 import pandas as pd
+import numpy as np
 #stockData管理
 @login_required(login_url='/login')
 def stockData_list(request):
@@ -338,7 +340,8 @@ def sd_submit(request):
             stock = Stock.objects.get(code=code)
             if stock:
                 stockData = StockData.objects.create(buy_time=buy_time,end_time=end_time,note=note,stock=stock)
-                df = ts.get_hist_data(code, start=buy_time, end=end_time)
+                df = ts.get_k_data(code, start=buy_time, end=end_time)[['date', 'open', 'close', 'high', 'low', 'volume']]
+                df.set_index('date', inplace=True)
                 df.sort_index(inplace=True)#由于下载的数据倒序排序，本方法重新按列索引排序
                 filePath = './dataSet/history/'+code+'_'+name+'.csv'
                 df.to_csv(filePath)
@@ -1047,7 +1050,7 @@ def bsp_mp_list(request):
     return render(request, 'bsp_mp_list.html', {'sss': queryset})
 
 def bsp_md_list(request):
-    queryset = ModelA.objects.all()
+    queryset = BSP_Predict_Model.objects.all()
     return render(request, 'bsp_md_list.html', {'sss': queryset})
 
 def bsp_al_list(request):
@@ -1088,9 +1091,12 @@ def bsp_md_vis(request,id):
 def bsp_md_add(request):
     return render(request, 'bsp_md_add.html')
 
-def md_submit(request):
+
+@csrf_exempt
+def bsp_md_submit(request):
     if request.POST:
         name = request.POST['name']
+        print(name)
         algorithmId = request.POST['algorithmId']
         tiDataId = request.POST['tiDataId']
         bsp_c_id = request.POST['bsp_c_id']
@@ -1102,13 +1108,13 @@ def md_submit(request):
         note = request.POST['note']
         algorithm = BSP_Algorithm.objects.filter(id=algorithmId)
         tiData = TechnicalData.objects.filter(id=tiDataId)
-        bsp_c_stra = TechnicalData.objects.filter(id=bsp_c_id)
+        bsp_c_stra = Choice_t_strategy.objects.filter(id=bsp_c_id)
         f_c_m = feature_c_method.objects.filter(id=f_c_id)
         print('-------------------------------------')
         if algorithm.count() == 0 or tiData.count() == 0:
             return render(request, 'bsp_md_add.html')
         else:
-            bsp_model = BSP_Predict_Model.objects.create(name=name,algorithm=algorithm[0],tiData=tiData[0],bsp_recognize_s=bsp_c_stra[0],f_choice=f_c_m[0])
+            bsp_model = BSP_Predict_Model(name=name,algorithm=algorithm[0],tidata=tiData[0],bsp_recognize_s=bsp_c_stra[0],f_choice=f_c_m[0])
             # m1存储的是序列数据的长度，即用多少天的数据来预测最后一天的数据。
             bsp_model.m1 = m1
             bsp_model.m2 = m2
@@ -1117,25 +1123,25 @@ def md_submit(request):
             bsp_model.note = note
 
             if bsp_model.m1 == '':
-                forecast_out = 0
+                forecast_out = 10
             else:
                 forecast_out = int(bsp_model.m1)
-            clf,accuracy, y_test, result,r1,r2,r3= create_bsp_pre_models(tiData[0].filePath,algorithm[0].id,bsp_c_stra[0].id, f_c_m[0].id,forecast_out)
-            if accuracy>0.9:
-                accuracy = 0.8+accuracy/10
-            bsp_model.result = round(accuracy,4)
-            trueY = [str(i) for i in y_test]
-            predictY = [str(round(i,2)) for i in result]
-            bsp_model.r1 = json.dumps(trueY)#将列表转换为json类型数据进行保存
-            bsp_model.r2 = json.dumps(predictY)
-            bsp_model.r3 = round(r1,4)
-            bsp_model.r4 = round(r2,4)
-            bsp_model.r5 = round(r3,4)
-            bsp_model.m9 = "创建"
+            clf, accuracy, y_pre = tools.create_bsp_pre_models.create_bsp_p_model(tiData[0].filePath
+                                                                                ,algorithm[0].id, bsp_c_stra[0].id
+                                                                                ,f_c_m[0].id, forecast_out)
+            # if accuracy>0.9:
+            #     accuracy = 0.8+accuracy/10
+            y_pre_path = './dataSet/bsp_model_test_result/'+tiData[0].stockData.stock.name+'_'\
+                         +str(datetime.date.today())+'_'+str(np.random.randint(1,1000))+'.csv'
+            pd.DataFrame(y_pre.values,index=y_pre.index).to_csv(y_pre_path)
+            bsp_model.r1 = round(accuracy, 4)
+            # trueY = [str(i) for i in y_test]
+            # predictY = [str(round(i,2)) for i in result]
+            bsp_model.m10 = "创建"
             #保存好的模型
             filePath = './dataSet/choice_bsp_models/'+name+'_model.m'
             joblib.dump(clf,filePath)
             bsp_model.modelPath = filePath
             bsp_model.save()
-            return JsonResponse({'msg':'添加成功'})
-    return render(request, 'md-add.html')
+            return JsonResponse({'msg': '添加成功'})
+    return render(request, 'bsp_md_add.html')

@@ -15,23 +15,23 @@ def trend_trace_MA(filePath, snum, lnum):
     :return: bs_points： 代表判断的买卖点
 
     """
-
-    shdata = pd.read_csv(filePath, index_col='date', date_parser=True)
+    print(filePath)
+    shdata = pd.read_csv(filePath, index_col='date')
 
 
     golden_cross = []
     death_cross = []
 
     # 求金叉死叉的方法二
-    ser1 = shdata['MA_'+str(snum)] < shdata['MA_'+str(lnum)]
-    ser2 = shdata['MA_'+str(snum)] >= shdata['MA_'+str(lnum)]
+    ser1 = shdata['MA'+str(snum)] < shdata['MA'+str(lnum)]
+    ser2 = shdata['MA'+str(snum)] >= shdata['MA'+str(lnum)]
     # One-dimensional ndarray with axis labels (including time series).
 
     death_cross = shdata[ser1 & ser2.shift(1)].index
     golden_cross = shdata[-(ser1 | ser2.shift(1))].index
 
     ser1 = pd.Series(1, index=golden_cross)
-    ser2 = pd.Series(0, index=death_cross)
+    ser2 = pd.Series(-1, index=death_cross)
     bs_points = ser1.append(ser2).sort_index()
 
 

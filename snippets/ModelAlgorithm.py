@@ -16,7 +16,7 @@ from sklearn import ensemble
 
 def load_data(fileName,forecast_out=0):
     #fileName = '../data/600015.XSHG.csv'
-    df = pd.read_csv(fileName, index_col='date', parse_dates=True)  # 读入csv的数值字符为数值型
+    df = pd.read_csv(fileName, index_col='date')  # 读入csv的数值字符为数值型
 
     df['HH_PCH'] = (df['high'] - df['open']) / df['close'] * 100.0
     df['HL_PCT'] = (df['open'] - df['low']) / df['close'] * 100.0

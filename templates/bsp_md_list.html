@@ -50,16 +50,17 @@
 					<th width="40">ID</th>
 					<th width="80">模型名称</th>
 					<th width="50">数据集ID</th>
-					<th width="60">股票代码</th>
-					<th width="80">股票名称</th>
-					<th width="50">算法ID</th>
+
+					<th width="50">股票名称</th>
+
 					<th width="80">算法名称</th>
-					<th width="50">序列参数</th>
-					<th width="80">预测准确率</th>
+					<th width="90">买卖点识别方法</th>
+					<th width="80">特征选择方法</th>
+					<th width="50">预测准确率</th>
 					<th width="60">是否过期</th>
-					<th width="60">模型来源</th>
+					<th width="50">模型来源</th>
 					<!--<th width="80">备注</th>-->
-					<th width="80">操作</th>
+					<th width="90">操作</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -68,13 +69,12 @@
 					<td><input type="checkbox" value="{{ss.id}}" name="ssuser"></td>
 					<td>{{ss.id}}</td>
 					<td>{{ss.name}}</td>
-					<td>{{ss.stockData.id}}</td>
-					<td>{{ss.stockData.stock.code}}</td>
-					<td>{{ss.stockData.stock.name}}</td>
-					<td>{{ss.algorithm.id}}</td>
+					<td>{{ss.tidata.id}}</td>
+					<td>{{ss.tidata.stockData.stock.name}}</td>
 					<td>{{ss.algorithm.name}}</td>
-					<td>{{ss.m1}}</td>
-					<td>{{ss.result}}</td>
+					<td>{{ss.bsp_recognize_s.name}}</td>
+					<td>{{ss.f_choice.name}}</td>
+					<td>{{ss.r1}}</td>
 					{% if ss.isExpired == False %}
 					<td class="td-status"><span class="label label-success radius">未过期</span></td>
 					{% else %}
