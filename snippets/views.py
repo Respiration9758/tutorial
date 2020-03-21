@@ -1036,8 +1036,8 @@ def cts_list(request):
     queryset = Choice_t_strategy.objects.all()
     return render(request, 'cts_list.html', {'sss':queryset})
 
-def cs_p_v(request):
-    return render(request, 'choice_stock_result_cmp_v.html', { })
+def ct_p_v(request):
+    return render(request, 'choice_time_result_cmp_v.html', { })
 
 def r_test(request):
     return render(request, 'r_test.html', { })
@@ -1071,22 +1071,25 @@ def trend_r_list(request):
 
 def bsp_md_vis(request,id):
     print('---md_visual-----'+id)
-    modelAs = ModelA.objects.filter(id=id)
-    if modelAs.count() !=0:
-        modelA = modelAs[0]
-        title=modelA.stockData.stock.code + ' - '+modelA.stockData.stock.name + ' 预测建模'
-        subtitle='选取数据集范围：'+modelA.stockData.buy_time+' : '+modelA.stockData.end_time
-        number = len(json.loads(modelA.r1))
-        # print(number)
-        x = [i for i in range(1,number+1)]
-        X = json.dumps(x)
-        y_true = [float(i) for i in json.loads(modelA.r1)];
-        # print(y_true)
-        y_predict = [float(i) for i in json.loads(modelA.r2)];
-        ret = {'msg':'成功!','acc':modelA.result,'title':json.dumps(title),'subtitle':json.dumps(subtitle),'X':X,'y_true':json.dumps(y_true),'y_predict':json.dumps(y_predict)}
+    bsp_ms = BSP_Predict_Model.objects.filter(id=id)
+    if bsp_ms.count() !=0:
+        bsp_m = bsp_ms[0]
+        title=bsp_m.tidata.stockData.stock.code + ' - '+bsp_m.tidata.stockData.stock.name + ' 预测建模'
+        subtitle='选取数据集范围：'+bsp_m.tidata.stockData.buy_time+' : '+bsp_m.tidata.stockData.end_time
+        pre_df = pd.read_csv(bsp_m.result, index_col='date')
+
+        close_df = pd.read_csv(bsp_m.tidata.filePath, index_col='date')['close']
+
+        ret = {'msg':'成功!',
+               'title':json.dumps(title),
+               'subtitle':json.dumps(subtitle),
+               'pre_date':json.dumps(list(pre_df.index)),
+               'close_date': json.dumps(list(close_df.index)),
+               'pre_label':json.dumps(list(pre_df.values.tolist())),
+               'close':json.dumps(list(close_df.values.tolist()))}
     else:
-        ret = {'msg':'失败!'}
-    return render(request, 'bsp_md_vis.html', ret)
+        ret = {'msg':'error'}
+    return render(request, 'bsp_model_test_vis.html', ret )
 
 def bsp_md_add(request):
     return render(request, 'bsp_md_add.html')
@@ -1133,6 +1136,7 @@ def bsp_md_submit(request):
             #     accuracy = 0.8+accuracy/10
             y_pre_path = './dataSet/bsp_model_test_result/'+tiData[0].stockData.stock.name+'_'\
                          +str(datetime.date.today())+'_'+str(np.random.randint(1,1000))+'.csv'
+            bsp_model.result = y_pre_path
             pd.DataFrame(y_pre.values,index=y_pre.index).to_csv(y_pre_path)
             bsp_model.r1 = round(accuracy, 4)
             # trueY = [str(i) for i in y_test]
@@ -1145,3 +1149,172 @@ def bsp_md_submit(request):
             bsp_model.save()
             return JsonResponse({'msg': '添加成功'})
     return render(request, 'bsp_md_add.html')
+
+def showCTS(request):
+    cts_list = Choice_t_strategy.objects.filter(isExpired=False).values('name')
+    data = json.dumps(list(cts_list))
+    return JsonResponse(data, safe=False)
+
+def showBSP_model(request):
+    bsp_model_list = BSP_Predict_Model.objects.filter(isExpired=False).values('name')
+    data = json.dumps(list(bsp_model_list))
+    return JsonResponse(data, safe=False)
+
+
+from tools.choice_time_strategy import trend_trace_MA
+from tools.feature_choice import TI_PCA
+@csrf_exempt
+def obtain_cmp_data(request):
+    model = request.POST.get("model")
+    cts = request.POST.get("cts")
+    tidata = request.POST.get("tidata")
+    stockCode = request.POST.get("stockCode")
+    showData = {}
+    if (stockCode == None) or (stockCode == ''):
+        pass
+    else:
+        try:
+            bsp_md = BSP_Predict_Model.objects.filter(name=model)
+            bsp_cts = Choice_t_strategy.objects.filter(name=cts)
+            tech_data = TechnicalData.objects.filter(id=tidata)
+
+            # 获取技术指标数据
+            tidata_df = pd.read_csv(tech_data[0].filePath, index_col='date')
+
+            if bsp_cts[0].id == 1 :
+                bs_points = trend_trace_MA(tech_data[0].filePath, 5, 20)
+
+
+            tidata_df['label'] = bs_points
+            # print(tidata_df.describe())
+            tidata_df.fillna(0, inplace=True)
+
+            # 整理训练集(用periods天的数据预测下一天的数据)
+            period = int(bsp_md[0].m1)
+
+            for i in range(tidata_df.shape[0] - period+1):
+                if i == 0:
+                    train = tidata_df.iloc[i:i + period, :-1].values.reshape(1, -1)
+                else:
+                    train = np.concatenate((train, tidata_df.iloc[i:i + period, :-1].values.reshape(1, -1)), axis=0)
+
+            # train为数组类型 ,转换成DataFrame
+            train = np.concatenate((train, tidata_df.iloc[period-1:, -1].values.reshape(-1, 1)), axis=1)
+            train_df = pd.DataFrame(train, index=tidata_df.iloc[period-1:, 0].index)
+
+            # 特征工程
+            f_c = bsp_md[0].f_choice.id
+            if f_c == 1:
+                train = tools.feature_choice.TI_PCA(train_df.iloc[:, :-1])
+
+            # train_data
+            train_data = pd.DataFrame(train, index=train_df.index)
+            # print(train_data)
+
+            #加载模型
+            pre_model = joblib.load(bsp_md[0].modelPath)
+
+            # 预测结果
+            pre_result = pre_model.predict(train_data)
+            tidata_df = tidata_df.iloc[period-1:,:]
+            print(tidata_df.shape[0])
+            print(train_data.shape[0])
+            print(len(pre_result))
+
+            obtain_md = []
+            obtain_cts = []
+
+            obtain_everyday = (tidata_df['close'] - tidata_df['close'].shift(1))/(tidata_df['close'].shift(1)) * 100
+            obtain_everyday.fillna(5,inplace=True)
+
+
+            last_flag = 0
+            obtain = 0
+            for i in range(tidata_df.shape[0]):
+                if(tidata_df.iloc[i,-1] == 0):
+                    if(i == 0):
+                        obtain = 0
+                    else:
+                        if last_flag == 0 :
+                            obtain = obtain_cts[i-1]
+                        if last_flag == 1:
+                            obtain = obtain_cts[i-1] + obtain_everyday[i]
+                        if last_flag == -1 :
+                            obtain = obtain_cts[i-1]
+                if(tidata_df.iloc[i,-1] == 1):
+                    if(i==0):
+                        obtain = obtain_everyday[0]
+                    else:
+                        if(last_flag == 0):
+                            obtain = obtain_everyday[i]
+                        if(last_flag == 1):
+                            obtain = obtain_cts[i-1] + obtain_everyday[i]
+                        if(last_flag == -1):
+                            obtain = obtain_cts[i-1] + obtain_everyday[i]
+                    last_flag = 1
+                if (tidata_df.iloc[i, -1] == -1):
+                    if(i==0):
+                        obtain = 0
+                    else:
+                        if(last_flag == 0):
+                            obtain = obtain_cts[i-1]
+                        if(last_flag ==1):
+
+                            obtain = obtain_cts[i-1] + obtain_everyday[i]
+                        if(last_flag == -1):
+                            obtain = obtain_cts[i-1]
+                    last_flag =-1
+                obtain_cts.append(round(obtain, 3))
+
+            last_flag = 0
+            obtain = 0
+            for i in range(tidata_df.shape[0]):
+                if (pre_result[i] == 0):
+                    if (i == 0):
+                        obtain = 0
+                    else:
+                        if last_flag == 0:
+                            obtain = obtain_md[i - 1]
+                        if last_flag == 1:
+                            obtain = obtain_md[i - 1] + obtain_everyday[i]
+                        if last_flag == -1:
+                            obtain = obtain_md[i - 1]
+                if (pre_result[i] == 1):
+                    if (i == 0):
+                        obtain = obtain_everyday[0]
+                    else:
+                        if (last_flag == 0):
+                            obtain = obtain_everyday[i]
+                        if (last_flag == 1):
+                            obtain = obtain_md[i - 1] + obtain_everyday[i]
+                        if (last_flag == -1):
+                            obtain = obtain_md[i - 1] + obtain_everyday[i]
+                    last_flag = 1
+                if (pre_result[i] == -1):
+                    if (i == 0):
+                        obtain = 0
+                    else:
+                        if (last_flag == 0):
+                            obtain = obtain_md[i - 1]
+                        if (last_flag == 1):
+                            obtain = obtain_md[i - 1] + obtain_everyday[i]
+                        if (last_flag == -1):
+                            obtain = obtain_md[i - 1]
+                    last_flag = -1
+                obtain_md.append(round(obtain,3))
+
+            showData = {
+                "bsp_cts": json.dumps(list(tidata_df['label'].values)),
+                "bsp_md": json.dumps(list(pre_result)),
+                "date": list(train_data.index),
+                "close": json.dumps(list(tidata_df['close'].values)),
+                "title" : model +"  VS  "+cts,
+                "name1": model,
+                "name2": cts,
+                "obtain_md":json.dumps(obtain_md),
+                "obtain_cts":json.dumps(obtain_cts)
+            }
+        except BSP_Predict_Model.DoesNotExist as e:
+            return JsonResponse({"showData": showData,  "msg": "error"})
+
+    return JsonResponse({"showData": showData,"msg": "success"})

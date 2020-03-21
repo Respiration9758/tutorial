@@ -1,0 +1,276 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="../../static/lib/html5shiv.js"></script>
+<script type="text/javascript" src="../../static/lib/respond.min.js"></script>
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="../../static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="../../static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="../../static/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="../../static/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="../../static/h-ui.admin/css/style.css" />
+<!--[if IE 6]>
+<script type="text/javascript" src="../../static/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
+<script>DD_belatedPNG.fix('*');</script>
+<![endif]-->
+<title>预测模型数据可视化</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 可视化管理 <span class="c-gray en">&gt;</span> 买卖点预测可视化 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<!--<div class="f-14 c-error">买卖点预测可视化</div>-->
+	<div id="main" style="min-width:700px;height:550px"></div>
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="../../static/lib/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="../../static/lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="../../static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="../../static/h-ui.admin/js/H-ui.admin.js"></script>
+
+<!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="../../static/lib/hcharts/Highcharts/5.0.6/js/highcharts.js"></script>
+<script type="text/javascript" src="../../static/lib/hcharts/Highcharts/5.0.6/js/modules/exporting.js"></script>
+<!--添加Echarts插件-->
+<script type="text/javascript" src="../../static/lib/echarts/3.4.0/echarts.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function () {
+	var pre_date = JSON.parse('{{ pre_date|safe }}');
+	var title=JSON.parse('{{ title|safe }}');
+	var subtitle=JSON.parse('{{ subtitle|safe }}');
+	var close_date = JSON.parse('{{ close_date|safe }}');
+	var pre_label=JSON.parse('{{ pre_label|safe }}');
+	var close = JSON.parse('{{ close|safe }}');
+
+	var buy_p = []
+	var sale_p = []
+
+	console.log(pre_label)
+	console.log(pre_date)
+	for(var i=0; i < pre_label.length;i++){
+		if (pre_label[i] == 1){
+			buy_p.push([pre_date[i], close[close_date.indexOf(pre_date[i])]])
+
+		}else if(pre_label[i] == -1){
+			sale_p.push([pre_date[i], close[close_date.indexOf(pre_date[i])]])
+
+		}
+	}
+
+
+
+	/*基于准备好的dom，初始化echarts实例*/
+	var myChart = echarts.init(document.getElementById('main'));
+
+
+
+
+
+
+	option = {
+            title: {    //标题
+                text: title,
+                left: 'center',
+            },
+            tooltip: {  //提示框
+                trigger: 'axis',    //触发类型：坐标轴触发
+                axisPointer: {  //坐标轴指示器配置项
+                    type: 'cross'   //指示器类型，十字准星
+                }
+            },
+			color : ['#525', 'red','green'],
+            legend: {   //图例控件，点击图例控制哪些系列不现实
+                top: 30,
+
+                data: ['close', 'buy_point', 'sale_point']
+            },
+            grid: {     //直角坐标系
+                show:true,
+                top:100,
+                left: '10%',    //grid组件离容器左侧的距离
+                right: '10%',
+                bottom: '15%',
+                //backgroundColor:'#ccc'
+            },
+            xAxis: {
+                type: 'category',   //坐标轴类型，类目轴
+                data: close_date,
+                //scale: true,  //只在数字轴中有效
+                boundaryGap : false,    //刻度作为分割线，标签和数据点会在两个刻度上
+                axisLine: {onZero: false},
+                splitLine: {show: false},   //是否显示坐标轴轴线
+                //splitNumber: 20,    //坐标轴的分割段数，预估值，在类目轴中无效
+                // min: 'dataMin', //特殊值，数轴上的最小值作为最小刻度
+                // max: 'dataMax'  //特殊值，数轴上的最大值作为最大刻度
+            },
+            yAxis: {
+                scale: true,    //坐标刻度不强制包含零刻度
+                axisLabel: {
+                    formatter: '￥{value} '
+                },
+                splitArea: {
+                    show: true  //显示分割区域
+                }
+            },
+            // dataZoom: [     //用于区域缩放
+            //     {
+            //         filterMode:'filter',    //当前数据窗口外的数据被过滤掉来达到数据窗口缩放的效果  默认值filter
+            //         type: 'inside', //内置型数据区域缩放组件
+            //         start: 50,      //数据窗口范围的起始百分比
+            //         end: 100        //数据窗口范围的结束百分比
+            //     },
+            //     {
+            //         show: true,
+            //         type: 'slider', //滑动条型数据区域缩放组件
+            //         y: '90%',
+            //         start: 50,
+            //         end: 100
+            //     }
+            // ],
+            dataZoom: [{
+                    type: 'slider',
+                    realtime: false,
+                    start: 20,
+                    end: 70,
+                    top: 65,
+                    height: 20,
+                    handleIcon: 'M10.7,11.9H9.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4h1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
+                    handleSize: '120%'
+                }, {
+                    type: 'inside',
+
+                    start: 40,
+                    end: 70,
+                    top: 30,
+                    height: 20
+                }],
+            series: [
+
+                {   //收盘价
+                    name: 'close',
+                    type: 'line',
+                    data: close,
+                    smooth: true,
+                    lineStyle: {
+                        normal: {opacity: 0.5}
+                    }
+                },
+				{
+					name: 'buy_point',
+					type: 'scatter',
+					data: buy_p,
+					symbol:'circle',
+					itemStyle: {
+						color: {
+								type: 'linear',
+								x: 0,
+								y: 0,
+								x2: 0,
+								y2: 1,
+								colorStops: [{
+									offset: 0, color: 'red' // 0% 处的颜色
+								}, {
+									offset: 1, color: 'blue' // 100% 处的颜色
+								}],
+								global: false // 缺省为 false
+}
+					}
+				},
+				{
+					name: 'sale_point',
+					type: 'scatter',
+					data: sale_p,
+					symbol:'circle',
+					itemStyle: {
+						color: {
+								type: 'radial',
+								x: 0.5,
+								y: 0.5,
+								r: 0.5,
+								colorStops: [{
+									offset: 0, color: 'red' // 0% 处的颜色
+								}, {
+									offset: 1, color: 'blue' // 100% 处的颜色
+								}],
+								global: false // 缺省为 false
+}
+					}
+
+				}]
+
+        }
+
+
+
+
+
+
+
+	// 使用刚指定的配置项和数据显示图表
+	myChart.setOption(option);
+
+
+    })
+
+
+// $(function () {
+// var acc = JSON.parse('{{ acc|safe }}');
+// var title=JSON.parse('{{ title|safe }}');
+// var subtitle=JSON.parse('{{ subtitle|safe }}');
+// var x = JSON.parse('{{ X|safe }}');
+// var y_true=JSON.parse('{{ y_true|safe }}');
+// var y_predict = JSON.parse('{{ y_predict|safe }}');
+//     Highcharts.chart('container', {
+//         title: {
+//             text: title,
+//             x: -20 //center
+//         },
+//         subtitle: {
+//             text: subtitle,
+//             x: -20
+//         },
+//         xAxis: {
+//             categories: x
+//         },
+//         yAxis: {
+//             title: {
+//                 text: '收盘价价格 (/元)'
+//             },
+//             plotLines: [{
+//                 value: 0,
+//                 width: 1,
+//                 color: '#808080'
+//             }]
+//         },
+//         tooltip: {
+//             valueSuffix: '元'
+//         },
+//         legend: {
+//             layout: 'vertical',
+//             align: 'right',
+//             verticalAlign: 'middle',
+//             borderWidth: 0,
+//             title:{
+//             	text:"拟合优度: "+acc
+//             }
+//         },
+//         series: [{
+//             name: '实际收盘价',
+//             data: y_true
+//         }, {
+//             name: '预测收盘价',
+//             data: y_predict
+//         }]
+//     });
+// });
+</script>
+</body>
+</html>

@@ -30,7 +30,7 @@ def create_bsp_p_model(filePath, algorithm, bsp_r, f_c, period):
 
     # 整理训练集(用periods天的数据预测下一天的数据)
 
-    for i in range(tidata_df.shape[0] - period):
+    for i in range(tidata_df.shape[0] - period+1):
         if i == 0:
             train = tidata_df.iloc[i:i+period,:-1].values.reshape(1,-1)
         else:
@@ -38,9 +38,9 @@ def create_bsp_p_model(filePath, algorithm, bsp_r, f_c, period):
 
     # train 数组
 
-    train = np.concatenate((train, tidata_df.iloc[period:,-1].values.reshape(-1,1)), axis=1)
+    train = np.concatenate((train, tidata_df.iloc[period-1:,-1].values.reshape(-1,1)), axis=1)
 
-    train_df = pd.DataFrame(train,index=tidata_df.iloc[period:,0].index)
+    train_df = pd.DataFrame(train,index=tidata_df.iloc[period-1:,0].index)
     print((train_df.iloc[:,-1]==1).sum())
     print((train_df.iloc[:,-1]==0).sum())
     print((train_df.iloc[:,-1]==-1).sum())
@@ -67,9 +67,12 @@ def create_bsp_p_model(filePath, algorithm, bsp_r, f_c, period):
     if f_c == 1 :
         train = tools.feature_choice.TI_PCA(train_df.iloc[:,:-1])
 
+
+
+
     # train_data
     train_data = pd.DataFrame(train, index=train_df.index)
-    print(train_data)
+    # print(train_data)
 
 
     # 训练模型

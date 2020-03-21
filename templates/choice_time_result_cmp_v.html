@@ -1,0 +1,653 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="renderer" content="webkit|ie-comp|ie-stand">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+<!--[if lt IE 9]>
+<script type="text/javascript" src="static/lib/html5shiv.js"></script>
+<script type="text/javascript" src="static/lib/respond.min.js"></script>
+
+<![endif]-->
+<link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+<link rel="stylesheet" type="text/css" href="static/lib/Hui-iconfont/1.0.8/iconfont.css" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+<link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+
+<!--[if IE 6]>
+<script type="text/javascript" src="static/lib/DD_belatedPNG_0.0.8a-min.js" ></script>
+<script>DD_belatedPNG.fix('*');</script>
+<![endif]-->
+<title>选股对比</title>
+</head>
+<body>
+<nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 可视化管理 <span class="c-gray en">&gt;</span> 选股对比可视化 <a class="btn btn-success radius r btn-refresh" style="line-height:1.6em;margin-top:3px" href="javascript:location.replace(location.href);" title="刷新" ><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+<div class="page-container">
+	<div class="text-c">
+		<button onclick="removeIframe()" class="btn btn-primary radius">关闭选项卡</button>
+	 <span class="select-box inline">
+		 <select id="slmd" name="" class="select" style="width: 120px">
+		 </select></span>
+
+         <span class="select-box inline">
+		 <select id="slcts" name="" class="select">
+
+		</select>
+
+		 </span>
+		<!--建模日期范围：-->
+		<!--<input type="text" onfocus="WdatePicker({ maxDate:'#F{$dp.$D(\'logmax\')||\'%y-%M-%d\'}' })" id="logmin" class="input-text Wdate" style="width:120px;">-->
+		<!-- - -->
+		<!--<input type="text" onfocus="WdatePicker({ minDate:'#F{$dp.$D(\'logmin\')}',maxDate:'%y-%M-%d' })" id="logmax" class="input-text Wdate" style="width:120px;">-->
+		<input type="text" name="" id="tidata" placeholder=" 技术指标数据ID" style="width:250px" class="input-text">
+        <!--<input type="text" name="" id="stock" placeholder=" 股票代码" style="width:250px" class="input-text">-->
+		<button name="" id="cmp_v" class="btn btn-success" type="submit"><i class="Hui-iconfont">&#xe665;</i> 确定</button>
+	</div>
+
+
+	<div id="main" style="min-width:800px;height:550px"></div>
+
+</div>
+<!--_footer 作为公共模版分离出去-->
+<script type="text/javascript" src="static/lib/jquery/1.9.1/jquery.min.js"></script>
+<script type="text/javascript" src="static/lib/layer/2.4/layer.js"></script>
+<script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script>
+<script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script> <!--/_footer 作为公共模版分离出去-->
+
+<!--请在下方写此页面业务相关的脚本-->
+<script type="text/javascript" src="static/lib/My97DatePicker/4.8/WdatePicker.js"></script>
+<script type="text/javascript" src="static/lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="static/lib/laypage/1.2/laypage.js"></script>
+
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/highcharts.js"></script>
+<script type="text/javascript" src="static/lib/hcharts/Highcharts/5.0.6/js/modules/exporting.js"></script>
+<!--添加Echarts插件-->
+<script type="text/javascript" src="../../static/lib/echarts/3.4.0/echarts.js"></script>
+<script type="text/javascript">
+
+
+$(document).ready(function () {
+	$(function () {
+    //下拉数据加载
+    $.ajax({
+        type : 'get',
+        url : '/showBSP_model',
+        dataType : 'json',
+        success : function(datas) {//返回list数据并循环获取
+            datas =  $.parseJSON( datas )
+
+            var select = $("#slmd");
+            for (var i = 0; i < datas.length; i++) {
+                select.append("<option value='"+datas[i].name+"'>"
+                    + datas[i].name + "</option>");
+            }
+
+        }
+    })})
+
+	$(function () {
+
+
+    //下拉数据加载
+    $.ajax({
+        type : 'get',
+        url : '/showCTS',
+        dataType : 'json',
+        success : function(datas) {//返回list数据并循环获取
+            datas =  $.parseJSON( datas )
+			console.log(datas)
+
+            var select = $("#slcts");
+            for (var i = 0; i < datas.length; i++) {
+                select.append("<option value='"+datas[i].name+"'>"
+                    + datas[i].name + "</option>");
+            }
+
+        }
+    })
+
+    })
+
+	$("#cmp_v").click(function () {
+        model = $('#slmd').val()
+		cts = $('#slcts').val()
+
+		tidata = $('#tidata').val()
+		stockCode = $('#stock').val
+
+
+        $.ajax({
+            type: 'POST',
+			url: '/obtain_cmp_data',
+            data:{
+                'model':model,
+				'cts':cts,
+				'tidata':tidata,
+
+				'stockCode':stockCode
+            },
+			dataType: 'json',
+			success: function(data) {
+
+
+
+            	if(data.msg=="error"){
+
+            		alert("没有找到对应数据！");
+                    window.location.href="/ct_p_v"
+				}
+            	else{
+            	    showData = data.showData;
+
+
+                    var date = showData.date;
+                    var bsp_md =showData.bsp_md;
+                    var bsp_cts = showData.bsp_cts;
+                    var close = showData.close;
+                    var title = showData.title;
+                    var name1 = showData.name1;
+                    var name2 = showData.name2;
+                    var obt_md = showData.obtain_md;
+                    var obt_cts = showData.obtain_cts;
+                    var obtain_md = obt_md.split(',');
+                    var obtain_cts = obt_cts.split(',');
+                    obt_md = obt_md.replace(obt_md[0],'');
+                    obt_md = obt_md.replace(obt_md[obt_md.length -1],'');
+                    obt_cts = obt_cts.replace(obt_cts[0],'');
+                    obt_cts = obt_cts.replace(obt_cts[obt_cts.length -1],'');
+
+                    console.log(obt_md)
+					console.log(obtain_md)
+					console.log(obt_md[0])
+
+                    // console.log(close)
+
+
+                    // //写函数计算两种情况下，每日的累积收益率
+					// obtain_md = []
+					// obtain_cts = []
+					//
+					// obtain = 0
+					// last_point = 0
+					// for(var i= 0;i<close.length;i++){
+					// 	if(bsp_md[i]==0){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}else{
+					// 			if(last_point==0){
+					//
+					// 				obtain = obtain_md[i-1]
+					// 			}
+					// 			if(last_point==1){
+					// 				if(close[i-1]==0 || close[i-1] == NaN){
+					// 					obtain = obtain_md[i-1]
+					// 				}else{
+					// 					obtain = parseFloat(obtain_md[i-1]) + parseFloat(((close[i] -close[i-1])/close[i-1] * 100)).toFixed(3)
+					// 				}
+					// 			}
+					// 			if(last_point == -1){
+					// 				obtain = obtain_md[i-1]
+					// 			}
+					// 		}
+					// 	}
+					// 	if(bsp_md[i]==1){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}
+					// 		else{
+					// 			if(close[i-1]==0 || close[i-1] == NaN){
+					// 				obtain = obtain_md[i-1]
+					// 			}else{
+					// 				obtain = parseFloat(obtain_md[i-1]) + parseFloat(((close[i] -close[i-1])/close[i-1] * 100)).toFixed(3)
+					// 			}
+					// 		}
+					//
+					// 		last_point = 1
+					// 	}
+					//
+					// 	if(bsp_md[i]==-1){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}
+					// 		else{
+					// 			if(last_point==0 || last_point==-1){
+					// 				obtain = obtain_md[i-1]
+					// 			}
+					// 			if(last_point == 1){
+					// 				if(close[i-1]==0 || close[i-1] == NaN)
+					// 					obtain = obtain_md[i-1]
+					// 			    }else{
+					// 				    obtain = parseFloat(obtain_md[i-1]) + parseFloat(((close[i] -close[i-1])/close[i-1] * 100)).toFixed(3)
+					// 			}
+					// 			}
+					// 		last_point = -1
+					// 		}
+					// 	if (isNaN(obtain)){
+					// 		obtain_md.push(0)
+					// 	}else{
+					// 		obtain_md.push(obtain)
+					// 	}
+					//
+					//
+					// 	}
+					//
+					//
+					// obtain = 0
+					// last_point = 0
+					// for(var i= 0;i<close.length;i++){
+					// 	if(bsp_cts[i]==0){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}else{
+					// 			if(last_point==0){
+					// 				obtain = obtain_cts[i-1]
+					// 			}
+					// 			if(last_point==1){
+					// 				if(close[i-1]==0 || close[i-1] == NaN){
+					// 					obtain = obtain_cts[i-1]
+					// 				}else{
+					// 					obtain = parseFloat(obtain_cts[i-1]) + parseFloat(((close[i] -close[i-1])/close[i-1] * 100)).toFixed(3)
+					// 				}
+					// 			}
+					// 			if(last_point == -1){
+					// 				obtain = obtain_cts[i-1]
+					// 			}
+					// 		}
+					// 	}
+					// 	if(bsp_cts[i]==1){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}
+					// 		else{
+					// 			if(close[i-1]==0 || close[i-1] == NaN){
+					// 				obtain = obtain_cts[i-1]
+					// 			}else{
+					// 				obtain = parseFloat(obtain_cts[i-1]) + parseFloat(((close[i] -close[i-1])/close[i-1] * 100)).toFixed(3)
+					// 			}
+					// 		}
+					//
+					// 		last_point = 1
+					// 	}
+					//
+					// 	if(bsp_cts[i]==-1){
+					// 		if(i==0){
+					// 			obtain = 0
+					// 		}
+					// 		else{
+					// 			if(last_point==0 || last_point==-1){
+					// 				obtain = obtain_cts[i-1]
+					// 			}
+					// 			if(last_point == 1){
+					// 				if(close[i-1]==0 || close[i-1] == NaN)
+					// 					obtain = obtain_cts[i-1]
+					// 			    }else{
+					// 				    obtain = parseFloat(obtain_cts[i-1]) + parseFloat((((close[i] -close[i-1])/close[i-1] )* 100)).toFixed(3)
+					// 			}
+					// 			}
+					// 		last_point = -1
+					// 		}
+					// 	if (isNaN(obtain)){
+					// 		obtain_cts.push(0)
+					// 	}else{
+					// 		obtain_cts.push(obtain)
+					// 	}
+					//
+					// 	}
+					//
+					// console.log(obtain_md)
+					// console.log(obtain_cts)
+					// obtain = 0
+					// last_point = 0
+					// last_point_idex = -1
+					// for (var i=0;i<close.length;i++){
+					// 	if(bsp_md[i] ==0){
+					// 		if(last_point==0){
+					// 			obtain = 0
+					// 		}
+					// 		if(last_point ==1){
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_md[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					//
+					// 			}
+					// 		}
+					// 		if(last_point== -1){
+					// 			obtain = obtain_md[last_point_idex]
+					// 		}
+					//
+					// 	}
+					//
+					// 	if(bsp_md[i] ==1){
+					//
+					// 		if (last_point==0 ){
+					// 			if(close[i-1] == 0 || close[i-1]==NaN){
+					// 				if(i==0){
+					// 					obtain=0
+					// 				}else{
+					// 					obtain = obtain_md[i-1]
+					// 				}
+					//
+					// 			}else{
+					// 				obtain = ((close[i] - close[i-1])/ close[i-1] * 100).toFixed(3)
+					// 			}
+					//
+					// 		}
+					// 		if(last_point == -1){
+					// 			if(close[i-1]==0 || close[i-1] ==NaN){
+					// 				obtain = obtain_md[i-1]
+					// 			}else{
+					// 				obtain = ((close[i] - close[i-1])/ close[i-1] * 100).toFixed(3) + obtain_md[i-1]
+					// 			}
+					// 		}
+					// 		if(last_point == 1) {
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_md[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					// 			}
+					// 		}
+					//
+					// 		last_point = 1
+					// 		last_point_idex = i
+					// 	}
+					// 	if (bsp_md[i] == -1){
+					// 		if(last_point==0){
+					// 			obtain = 0
+					// 		}
+					//
+					// 		if ( last_point == -1){
+					// 			obtain = obtain_md[last_point_idex]
+					// 		}
+					// 		if(last_point == 1) {
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_md[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					//
+					// 			}
+					//
+					// 		}
+					// 		last_point = -1
+					// 		last_point_idex = i
+					//
+					// 	}
+					// 	obtain_md.push(obtain)
+					// }
+					//
+					// obtain = 0
+					// last_point = 0
+					// last_point_idex = -1
+					// for (var i=0;i<close.length;i++){
+					// 	if(bsp_cts[i] ==0){
+					// 		if(last_point==0){
+					// 			obtain = 0
+					// 		}
+					// 		if(last_point ==1){
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_cts[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					//
+					// 			}
+					// 		}
+					// 		if(last_point== -1){
+					// 			obtain = obtain_cts[last_point_idex]
+					// 		}
+					//
+					// 	}
+					//
+					// 	if(bsp_md[i] ==1){
+					//
+					// 		if (last_point==0 ){
+					// 			if(close[i-1] == 0 || close[i-1]==NaN){
+					// 				if(i==0){
+					// 					obtain=0
+					// 				}else{
+					// 					obtain = obtain_cts[i-1]
+					// 				}
+					//
+					// 			}else{
+					// 				obtain = ((close[i] - close[i-1])/ close[i-1] * 100).toFixed(3)
+					// 			}
+					//
+					// 		}
+					// 		if(last_point == -1){
+					// 			if(close[i-1]==0 || close[i-1] ==NaN){
+					// 				obtain = obtain_cts[i-1]
+					// 			}else{
+					// 				obtain = ((close[i] - close[i-1])/ close[i-1] * 100).toFixed(3) + obtain_cts[i-1]
+					// 			}
+					// 		}
+					// 		if(last_point == 1) {
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_cts[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					// 			}
+					// 		}
+					//
+					// 		last_point = 1
+					// 		last_point_idex = i
+					// 	}
+					// 	if (bsp_md[i] == -1){
+					// 		if(last_point==0){
+					// 			obtain = 0
+					// 		}
+					//
+					// 		if ( last_point == -1){
+					// 			obtain = obtain_cts[last_point_idex]
+					// 		}
+					// 		if(last_point == 1) {
+					// 			if(close[last_point_idex]==0 || close[last_point_idex] ==NaN){
+					// 				obtain = obtain_cts[i-1]
+					// 			}else {
+					// 				obtain = ((close[i] - close[last_point_idex])/ close[last_point_idex] * 100).toFixed(3)
+					//
+					// 			}
+					//
+					// 		}
+					// 		last_point = -1
+					// 		last_point_idex = i
+					//
+					// 	}
+					// 	obtain_cts.push(obtain)
+					// }
+
+
+					/*基于准备好的dom，初始化echarts实例*/
+					var myChart = echarts.init(document.getElementById('main'));
+
+					option = {
+    title: {
+        text: title,
+        left: 'center',
+        align: 'right'
+    },
+    grid: {
+        bottom: 80
+    },
+    toolbox: {
+        feature: {
+            dataZoom: {
+                yAxisIndex: 'none'
+            },
+            restore: {},
+            saveAsImage: {}
+        }
+    },
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross',
+            animation: false,
+            label: {
+                backgroundColor: '#505765'
+            }
+        }
+    },
+    legend: {
+        data: [name1, name2],
+        left: 'center',
+		top:35
+    },
+    dataZoom: [
+        {
+            show: true,
+            realtime: true,
+            start: 0,
+            end: 100
+        },
+        {
+            type: 'inside',
+            realtime: true,
+            start: 0,
+            end: 100
+        }
+    ],
+    xAxis: [
+        {
+            type: 'category',
+			data: date,
+            boundaryGap: false,
+			nameLocation: 'end',
+            axisLine: {onZero: true}
+
+
+        }
+    ],
+    yAxis: [
+        {
+            name: '累积收益率(%)',
+            type: 'value',
+
+        }
+        // {
+        //     name: '累积收益率(%)',
+        //     nameLocation: 'start',
+		//
+        //     type: 'value',
+        //     // inverse: true
+        // }
+    ],
+    series: [
+       {
+                name: name1,
+                type: 'line',
+                smooth: true,
+                showSymbol: false,
+                symbol: 'circle',
+                symbolSize: 6,
+                data: obtain_md,
+                areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(16, 79, 193,1)'
+                        }, {
+                            offset: 1,
+                            color: 'rgba(125, 178, 244,1)'
+                        }], false)
+                    }
+                },
+                itemStyle: {
+                    normal: {
+                        color: 'rgba(16, 79, 193,1)'
+                    }
+                },
+                lineStyle: {
+                    normal: {
+                        width: 1
+                    }
+                }
+            },
+        {
+            name: name2,
+            type: 'line',
+			data: obtain_cts,
+            // yAxisIndex: 1,
+            animation: false,
+           areaStyle: {
+                    normal: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(190, 113, 116,1)'
+                        }, {
+                            offset: 1,
+                            color: 'rgba(150, 100, 100,1)'
+                        }], false)
+                    }
+                },
+			itemStyle: {
+                    normal: {
+                        color: 'rgba(190, 113, 116, 1)'
+                    }
+                },
+            lineStyle: {
+                width: 1
+            },
+            // markArea: {
+            //     silent: true,
+            //     data: [
+            //         [{
+            //             xAxis: date[0]
+            //         }, {
+            //             xAxis: date[date.length-1]
+            //         }]
+            //     ]
+            // },
+
+        }
+    ]
+};
+
+					// 使用刚指定的配置项和数据显示图表
+					myChart.setOption(option);
+
+
+                        }
+
+
+			},
+			error:function(data) {
+
+			},
+
+        })
+
+    })
+
+
+
+
+
+	var csrftoken = $.cookie('csrftoken');
+
+	function csrfSafeMethod(method) {
+		// these HTTP methods do not require CSRF protection
+		return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+
+	$.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+			if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			}
+		}
+	});
+
+
+	
+})
+
+
+
+
+
+
+</script>
+</body>
+</html>

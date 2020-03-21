@@ -15,7 +15,6 @@ def trend_trace_MA(filePath, snum, lnum):
     :return: bs_points： 代表判断的买卖点
 
     """
-    print(filePath)
     shdata = pd.read_csv(filePath, index_col='date')
 
 
@@ -33,7 +32,6 @@ def trend_trace_MA(filePath, snum, lnum):
     ser1 = pd.Series(1, index=golden_cross)
     ser2 = pd.Series(-1, index=death_cross)
     bs_points = ser1.append(ser2).sort_index()
-
 
     return  bs_points
 

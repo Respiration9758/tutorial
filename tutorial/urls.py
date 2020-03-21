@@ -134,7 +134,7 @@ urlpatterns = [
     url(r'^css_list$', views.css_list, name='css_list'),
     url(r'^cts_list$', views.cts_list, name='cts_list'),
 
-    url(r'^cs_p_v$', views.cs_p_v, name='cs_p_v'),
+    url(r'^ct_p_v$', views.ct_p_v, name='ct_p_v'),
     url(r'^r_test$', views.r_test, name='r_test'),
     url(r'^user_analysis$', views.user_analysis, name='user_analysis'),
 
@@ -148,6 +148,9 @@ urlpatterns = [
 
     url(r'^bsp_md_vis/(.+)/$', views.bsp_md_vis, name='bsp_md_vis'),
     url(r'^bsp_md_add$', views.bsp_md_add, name='bsp_md_add'),
-    url(r'^bsp_md_submit$', views.bsp_md_submit, name='bsp_md_submit')
+    url(r'^bsp_md_submit$', views.bsp_md_submit, name='bsp_md_submit'),
+    url(r'^showCTS$', views.showCTS, name='showCTS'),
+    url(r'^showBSP_model$', views.showBSP_model, name='showBSP_model'),
+    url(r'^obtain_cmp_data$', views.obtain_cmp_data, name='obtain_cmp_data')
 
 ]
