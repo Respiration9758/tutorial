@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7e31d84e-645f-4077-9261-715c430fb05d" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/templates/choice_time_result_cmp_v.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataSet/choice_bsp_models/rf_5_300.model" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/snippets/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/snippets/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/choice_stock_result_cmp_v.html" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/choice_time_strategy.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/choice_time_strategy.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tools/create_bsp_pre_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/tools/create_bsp_pre_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tutorial/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/tutorial/urls.py" afterDir="false" />
-    </list>
+    <list default="true" id="7e31d84e-645f-4077-9261-715c430fb05d" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,40 +39,19 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3864">
+            <state relative-caret-position="295">
               <caret line="161" column="97" selection-start-line="161" selection-start-column="97" selection-end-line="161" selection-end-column="97" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/snippets/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="27768">
-              <caret line="1157" column="8" selection-start-line="1157" selection-start-column="8" selection-end-line="1157" selection-end-column="8" />
-              <folding>
-                <element signature="e#24#63#0" expanded="true" />
-                <element signature="e#31800#32647#0" />
-                <element signature="e#32748#34137#0" />
-                <element signature="e#34486#36380#0" />
-                <element signature="e#36412#36606#0" />
-                <element signature="e#36637#37415#0" />
-                <element signature="e#37875#37935#0" />
-                <element signature="e#40013#42527#0" />
-                <element signature="e#43055#49217#0" />
-                <element signature="e#45413#46914#0" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/templates/choice_time_result_cmp_v.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="175">
+            <state relative-caret-position="1152">
               <caret line="48" selection-start-line="48" selection-end-line="48" />
               <folding>
                 <element signature="n#style#0;n#select#0;n#span#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -248,7 +217,29 @@
             <path>
               <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
               <item name="tutorial_v1" type="462c0819:PsiDirectoryNode" />
+              <item name="dataSet" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tutorial_v1" type="462c0819:PsiDirectoryNode" />
+              <item name="dataSet" type="462c0819:PsiDirectoryNode" />
+              <item name="bsp_model_test_result" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tutorial_v1" type="462c0819:PsiDirectoryNode" />
+              <item name="dataSet" type="462c0819:PsiDirectoryNode" />
+              <item name="choice_bsp_models" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tutorial_v1" type="462c0819:PsiDirectoryNode" />
               <item name="snippets" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
+              <item name="tutorial_v1" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="tutorial_v1" type="b2602c69:ProjectViewProjectNode" />
@@ -434,11 +425,12 @@
       <workItem from="1583998051704" duration="1422000" />
       <workItem from="1584258220607" duration="1306000" />
       <workItem from="1584343859320" duration="19000" />
+      <workItem from="1584772750757" duration="116000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="207161000" />
+    <option name="totallyTimeSpent" value="207277000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -452,7 +444,7 @@
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1378" height="780" extended-state="0" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.48996654" visible="true" weight="0.16084976" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.48996654" visible="true" weight="0.30652505" />
       <window_info id="Structure" order="1" weight="0.24962178" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -464,7 +456,7 @@
       <window_info anchor="bottom" id="TODO" order="6" weight="0.3293011" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="8" weight="0.7327869" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="9" sideWeight="0.49435824" visible="true" weight="0.39164087" />
+      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.49435824" visible="true" weight="0.39164087" />
       <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50564176" side_tool="true" weight="0.19623657" />
       <window_info anchor="bottom" id="Docker" order="11" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="12" weight="0.3295082" />
@@ -862,32 +854,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/templates/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3864">
-          <caret line="161" column="97" selection-start-line="161" selection-start-column="97" selection-end-line="161" selection-end-column="97" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/snippets/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="27768">
-          <caret line="1157" column="8" selection-start-line="1157" selection-start-column="8" selection-end-line="1157" selection-end-column="8" />
-          <folding>
-            <element signature="e#24#63#0" expanded="true" />
-            <element signature="e#31800#32647#0" />
-            <element signature="e#32748#34137#0" />
-            <element signature="e#34486#36380#0" />
-            <element signature="e#36412#36606#0" />
-            <element signature="e#36637#37415#0" />
-            <element signature="e#37875#37935#0" />
-            <element signature="e#40013#42527#0" />
-            <element signature="e#43055#49217#0" />
-            <element signature="e#45413#46914#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/bsp_model_test_vis.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="624">
@@ -907,7 +873,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/choice_time_result_cmp_v.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="175">
+        <state relative-caret-position="1152">
           <caret line="48" selection-start-line="48" selection-end-line="48" />
           <folding>
             <element signature="n#style#0;n#select#0;n#span#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -919,6 +885,32 @@
             <element signature="e#4198#4631#0" />
             <element signature="e#5083#5176#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/snippets/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23304">
+          <caret line="1157" column="8" selection-start-line="1157" selection-start-column="8" selection-end-line="1157" selection-end-column="8" />
+          <folding>
+            <element signature="e#24#63#0" expanded="true" />
+            <element signature="e#31800#32647#0" />
+            <element signature="e#32748#34137#0" />
+            <element signature="e#34486#36380#0" />
+            <element signature="e#36412#36606#0" />
+            <element signature="e#36637#37415#0" />
+            <element signature="e#37875#37935#0" />
+            <element signature="e#40013#42527#0" />
+            <element signature="e#43055#49217#0" />
+            <element signature="e#45413#46914#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/templates/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="295">
+          <caret line="161" column="97" selection-start-line="161" selection-start-column="97" selection-end-line="161" selection-end-column="97" />
         </state>
       </provider>
     </entry>
